@@ -5,7 +5,7 @@ from decimal import Decimal
 from re import sub
 from typing import List
 
-from src.wallbot.config.settings import SEARCH_INTERVAL
+from src.wallbot.config.settings import SEARCH_INTERVAL, CLEANUP_INTERVAL, CLEANUP_RETENTION_HOURS
 from src.wallbot.database.models import ChatSearch
 from src.wallbot.telegram.notifications import send_notification
 from src.wallbot.wallapop.api_client import WallapopClient
@@ -16,6 +16,7 @@ class WallapopMonitor:
         self.db = db
         self.client = WallapopClient()
         self.is_running = False
+        self.last_cleanup_time = 0
 
     def start(self):
         self.is_running = True
@@ -37,6 +38,12 @@ class WallapopMonitor:
         logging.info("Monitoring stopped")
 
     def _monitor_cycle(self):
+        # Check if it's time to run cleanup
+        current_time = time.time()
+        if current_time - self.last_cleanup_time >= CLEANUP_INTERVAL:
+            self._run_cleanup()
+            self.last_cleanup_time = current_time
+
         searches: List[ChatSearch] = self.db.get_chats_searches()
 
         for search in searches:
@@ -48,6 +55,15 @@ class WallapopMonitor:
             except Exception as e:
                 logging.error(
                     f"Error processing search for chat `{search.chat_id}`: {e}")
+
+    def _run_cleanup(self):
+        """Run database cleanup to remove old items"""
+        try:
+            logging.info(f"Running database cleanup - removing items older than {CLEANUP_RETENTION_HOURS} hours")
+            self.db.delete_items(CLEANUP_RETENTION_HOURS)
+            logging.info("Database cleanup completed successfully")
+        except Exception as e:
+            logging.error(f"Error during database cleanup: {e}")
 
     def _handle_response(self, search, response):
         try:
