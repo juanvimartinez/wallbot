@@ -2,6 +2,7 @@ import os
 
 TOKEN = os.getenv("BOT_TOKEN", "Bot Token does not exist")
 PROFILE = os.getenv("PROFILE")
+SEARCH_INTERVAL = int(os.getenv("SEARCH_INTERVAL", "300"))
 
 TELEGRAM_API_URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 WALLAPOP_API_URL = "https://api.wallapop.com/api/v3/search"

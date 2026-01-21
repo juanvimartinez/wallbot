@@ -12,7 +12,8 @@ class DBHelper:
     def __init__(self, dbname=None):
         calculated_db_name = self.__get_db_name(dbname)
         logging.info(f"DB: {calculated_db_name}")
-        self.__conn = sqlite3.connect(calculated_db_name, check_same_thread=False)
+        self.__conn = sqlite3.connect(
+            calculated_db_name, check_same_thread=False)
 
     @staticmethod
     def __get_db_name(dbname=None) -> str:
@@ -36,6 +37,7 @@ class DBHelper:
                       "publishDate integer, " \
                       "observaciones text, " \
                       "item text, " \
+                      "reserved integer default 0, " \
                       " primary key (itemId,chatId))"
         self.__conn.execute(tblstmtitem)
 
@@ -62,6 +64,22 @@ class DBHelper:
                 self.__conn.commit()
             except Exception as e:
                 logging.error(f"Error setting up the db: {e}")
+
+        if version == '2.0.4':
+            # Check if column exists before adding it
+            stmt_check = "PRAGMA table_info(item)"
+            columns = [row[1] for row in self.__conn.execute(stmt_check)]
+
+            if 'reserved' not in columns:
+                stmt = "ALTER TABLE item ADD COLUMN reserved INTEGER DEFAULT 0"
+                try:
+                    self.__conn.execute(stmt)
+                    self.__conn.commit()
+                    logging.info("Added reserved column to item table")
+                except Exception as e:
+                    logging.error(f"Error adding reserved column: {e}")
+            else:
+                logging.info("Reserved column already exists, skipping migration")
 
         self.__conn.commit()
 
@@ -112,23 +130,24 @@ class DBHelper:
         except sqlite3.IntegrityError as e:
             logging.error(f"Error adding chat search: {e}")
 
-    def add_item(self, item_id, chat_id, title, price, url, user, publish_date=None, observaciones=None):
-        stmt = "insert into item (itemId, chatId, title, price, url, user, publishDate, observaciones) " \
-               "values (?, ?, ?, ?, ?, ?, ?, ?)"
-        args = (item_id, chat_id, title, price, url, user, publish_date, observaciones)
+    def add_item(self, item_id, chat_id, title, price, url, user, publish_date=None, observaciones=None, item='', reserved=0):
+        stmt = "insert into item (itemId, chatId, title, price, url, user, publishDate, observaciones, item, reserved) " \
+               "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        args = (item_id, chat_id, title, price, url, user, publish_date, observaciones, item, reserved)
         try:
             self.__conn.execute(stmt, args)
             self.__conn.commit()
         except Exception as e:
             logging.error(f"Error adding item: {e}")
 
-    def update_item(self, item_id, price, obs):
+    def update_item(self, item_id, price, obs, reserved):
         stmt = "update item " \
                "set price = ?, " \
-               "observaciones = ? " \
+               "observaciones = ?, " \
+               "reserved = ? " \
                "where itemId = ?"
         try:
-            self.__conn.execute(stmt, (price, obs, item_id))
+            self.__conn.execute(stmt, (price, obs, reserved, item_id))
             self.__conn.commit()
         except Exception as e:
             logging.error(f"Error updating item: {e}")
@@ -142,15 +161,17 @@ class DBHelper:
             self.__conn.execute(stmt, args)
             self.__conn.commit()
         except Exception as e:
-            logging.error(f"Error deleting items older than {hours_live} hours: {e}")
+            logging.error(
+                f"Error deleting items older than {hours_live} hours: {e}")
 
     def search_item(self, item_id, chat_id):
-        stmt = "select itemId, chatId, title, price, url, publishDate, observaciones, user " \
+        stmt = "select itemId, chatId, title, price, url, publishDate, observaciones, user, reserved " \
                "from item where itemId = (?) and chatId = (?)"
         args = (item_id, chat_id)
         try:
             for row in self.__conn.execute(stmt, args):
-                i = Item(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                i = Item(row[0], row[1], row[2], row[3],
+                         row[4], row[5], row[6], row[7], row[8])
                 return i
         except Exception as e:
             logging.error(f"Error searching item: {e}")
@@ -162,10 +183,12 @@ class DBHelper:
         searches = []
         try:
             for row in self.__conn.execute(stmt, (chat_id,)):
-                c = ChatSearch(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                c = ChatSearch(row[0], row[1], row[2], row[3],
+                               row[4], row[5], row[6], row[7])
                 searches.append(c)
         except Exception as e:
-            logging.error(f"Error getting chat searches for chat_id {chat_id}: {e}")
+            logging.error(
+                f"Error getting chat searches for chat_id {chat_id}: {e}")
         return searches
 
     def get_chats_searches(self):
@@ -174,7 +197,8 @@ class DBHelper:
         lista: List[ChatSearch] = []
         try:
             for row in self.__conn.execute(stmt):
-                c = ChatSearch(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                c = ChatSearch(row[0], row[1], row[2], row[3],
+                               row[4], row[5], row[6], row[7])
                 lista.append(c)
         except Exception as e:
             logging.error(f"Error getting all chat searches: {e}")
@@ -192,4 +216,21 @@ class DBHelper:
             self.__conn.execute(stmt, (chat_id, kws))
             self.__conn.commit()
         except Exception as e:
-            logging.error(f"Error deleting chat search for chat_id {chat_id} and kws {kws}: {e}")
+            logging.error(
+                f"Error deleting chat search for chat_id {chat_id} and kws {kws}: {e}")
+
+    def del_all_chat_searches(self, chat_id):
+        try:
+            # First delete all related items for this chat_id
+            stmt_items = "delete from item where chatId = ?"
+            self.__conn.execute(stmt_items, (chat_id,))
+            
+            # Then delete all chat_search records for this chat_id
+            stmt_searches = "delete from chat_search where chat_id = ?"
+            self.__conn.execute(stmt_searches, (chat_id,))
+            
+            self.__conn.commit()
+        except Exception as e:
+            logging.error(
+                f"Error deleting all chat searches and items for chat_id {chat_id}: {e}")
+            self.__conn.rollback()

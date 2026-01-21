@@ -3,7 +3,7 @@ import threading
 
 from src.wallbot.telegram.handlers import TelegramHandlers
 from .database.db_helper import DBHelper
-from .telegram.bot import create_bot, recovery
+from .telegram.bot import create_bot, start_bot
 from .utils.logger import setup_logger
 from .utils.version import read_version
 from .wallapop.monitor import WallapopMonitor
@@ -11,7 +11,7 @@ from .wallapop.monitor import WallapopMonitor
 
 def main():
     setup_logger()
-    logging.info("JanJanJan starting...")
+    logging.info("WallBot starting")
 
     db = DBHelper()
     db.setup(read_version())
@@ -23,7 +23,7 @@ def main():
     monitor = WallapopMonitor(db)
     threading.Thread(target=monitor.start, daemon=True).start()
 
-    recovery(bot, 1)
+    start_bot(bot, 1)
 
 
 if __name__ == '__main__':

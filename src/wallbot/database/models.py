@@ -22,7 +22,7 @@ class ChatSearch:
 
 
 class Item:
-    def __init__(self, item_id, chat_id, title, price, url, publish_date, observaciones, item):
+    def __init__(self, item_id, chat_id, title, price, url, publish_date, observaciones, item, reserved=0):
         self.item_id = item_id
         self.chat_id = chat_id
         self.title = title
@@ -31,3 +31,4 @@ class Item:
         self.publish_date = publish_date
         self.observaciones = observaciones
         self.item = item
+        self.reserved = reserved

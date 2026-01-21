@@ -7,18 +7,20 @@ from src.wallbot.config.settings import TOKEN
 
 
 def create_bot():
-    logging.info("Creating bot...")
+    logging.info("Creating bot")
     return telebot.TeleBot(TOKEN)
 
 
-def recovery(bot, times):
+def start_bot(bot, times):
     try:
         time.sleep(times)
-        logging.info("Conexión a Telegram.")
+        logging.info("Connecting to Telegram")
         bot.polling(none_stop=True, timeout=3000)
     except Exception as e:
-        logging.error("Ha ocurrido un error con la llamada a Telegram. Se reintenta la conexión", e)
-        print("Ha ocurrido un error con la llamada a Telegram. Se reintenta la conexión")
+        logging.error(
+            "An error occurred with the Telegram call. Retrying connection", e)
+        print("An error occurred with the Telegram call. Retrying connection")
         if times > 16:
             times = 16
-        recovery(bot, times * 2)
+
+        start_bot(bot, times * 2)

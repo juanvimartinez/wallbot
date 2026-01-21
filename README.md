@@ -27,7 +27,67 @@ bot de Telegram para gestionar busquedas sobre wallapop
 - Avisa cuando algún ítem baja de precio
 - Permite gestionar tu lista de ítems
 
-pip3 install -r requirements.txt
+## Development Setup
+
+### Prerequisites
+
+- Python 3.x
+- pip3
+
+### Installation
+
+1. Clone the repository
+2. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On macOS/Linux
+   # or
+   venv\Scripts\activate     # On Windows
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+### Running Locally
+
+To run the application in development mode:
+
+```bash
+# Set the PROFILE environment variable for development
+export PROFILE=dev
+
+# Run the application
+python -m src.wallbot
+```
+
+Or run with inline environment variable:
+```bash
+PROFILE=dev python -m src.wallbot
+```
+
+### Environment Variables
+
+| Variable          | Required | Default | Description                                                                         |
+|-------------------|----------|---------|-------------------------------------------------------------------------------------|
+| `BOT_TOKEN`       | Yes      | -       | Your Telegram bot token                                                             |
+| `PROFILE`         | No       | -       | Set to any value for development mode. When set, uses local paths and debug logging |
+| `SEARCH_INTERVAL` | No       | 300     | Search interval in seconds                                                          |
+
+### Development vs Production Mode
+
+The `PROFILE` environment variable controls the application mode:
+
+**Development Mode** (PROFILE is set):
+- Database: `db.sqlite` (project root)
+- Logs: `wallbot.log` (project root)
+- Log Level: `DEBUG`
+
+**Production Mode** (PROFILE not set):
+- Database: `/data/db.sqlite` (Docker volume)
+- Logs: `/logs/wallbot.log` (Docker volume)
+- Log Level: `INFO`
 
 # Docker
 
@@ -45,7 +105,7 @@ docker build --tag z0r3f/wallbot-docker:latest .
 $version = Get-Content "VERSION"
 ```
 
-###### Unix
+###### Unix/MacOS
 
 ```bash
 version=`cat VERSION`
