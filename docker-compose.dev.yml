@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  wallbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wallbot-dev
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - SEARCH_INTERVAL=${SEARCH_INTERVAL:-300}
+      - PROFILE=dev  # Enable development mode
+    volumes:
+      - wallbot-data:/data
+      - wallbot-logs:/logs
+      - ./src:/app/src  # Mount source for development
+    networks:
+      - wallbot-network
+
+volumes:
+  wallbot-data:
+    driver: local
+  wallbot-logs:
+    driver: local
+
+networks:
+  wallbot-network:
+    driver: bridge

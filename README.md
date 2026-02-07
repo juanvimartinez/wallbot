@@ -17,14 +17,15 @@
 <!-- Licencia -->
 ![GitHub](https://img.shields.io/github/license/z0r3f/wallbot)
 
-# wallbot
+# Wallbot
 
-wallapop search bot
+Wallapop search bot
 
-bot de Telegram para gestionar busquedas sobre wallapop
+Bot de Telegram para gestionar búsquedas sobre Wallapop
 
-- Notifica cuando encuentra alguna busqueda
+- Notifica cuando encuentra alguna búsqueda
 - Avisa cuando algún ítem baja de precio
+- Avisa cuando algún ítem es reservado
 - Permite gestionar tu lista de ítems
 
 ## Development Setup
@@ -85,61 +86,196 @@ The `PROFILE` environment variable controls the application mode:
 - Log Level: `DEBUG`
 
 **Production Mode** (PROFILE not set):
-- Database: `/data/db.sqlite` (Docker volume)
-- Logs: `/logs/wallbot.log` (Docker volume)
+- Database: `/data/db.sqlite` (bind mount: `./data/` directory)
+- Logs: `/logs/wallbot.log` (bind mount: `./logs/` directory)
 - Log Level: `INFO`
 
 # Docker
 
-## Generate image docker
+## Quick Start with Docker Compose (Recommended)
 
+### Prerequisites
+- Docker and Docker Compose installed
+- Telegram Bot Token (get it from [@BotFather](https://t.me/botfather))
+
+### Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/z0r3f/wallbot.git
+   cd wallbot
+   ```
+
+2. **Create environment file**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Edit `.env` and add your bot token**
+   ```env
+   BOT_TOKEN=your_telegram_bot_token_here
+   SEARCH_INTERVAL=300
+   ```
+
+4. **Start the bot**
+   ```bash
+   docker-compose up -d
+   ```
+
+5. **View logs**
+   ```bash
+   docker-compose logs -f wallbot
+   ```
+
+6. **Stop the bot**
+   ```bash
+   docker-compose down
+   ```
+
+### Managing Data
+
+Data and logs are stored in local directories for easy access:
+- Database: `./data/db.sqlite`
+- Logs: `./logs/wallbot.log`
+
+**Backup database:**
 ```bash
+cp ./data/db.sqlite ./backup.sqlite
+```
+
+**Restore database:**
+```bash
+cp ./backup.sqlite ./data/db.sqlite
+docker-compose restart wallbot
+```
+
+**Direct access to data:**
+```bash
+# View database
+sqlite3 ./data/db.sqlite
+
+# View logs
+tail -f ./logs/wallbot.log
+```
+
+---
+
+## Building Docker Image
+
+### Automated Build (Recommended)
+
+Use the provided scripts to automatically build, tag, and optionally push the Docker image:
+
+**Linux/macOS:**
+```bash
+chmod +x build.sh
+./build.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+.\build.ps1
+```
+
+**Windows (CMD):**
+```batch
+build.bat
+```
+
+The scripts will:
+- ✅ Read version from `VERSION` file
+- ✅ Build image with both `latest` and version tags
+- ✅ Optionally push to Docker Hub (asks for confirmation)
+
+### Manual Build (Advanced)
+
+If you prefer manual control:
+
+**Linux/macOS:**
+```bash
+# Build image
 docker build --tag z0r3f/wallbot-docker:latest .
+
+# Tag with version
+VERSION=$(cat VERSION)
+docker tag z0r3f/wallbot-docker:latest z0r3f/wallbot-docker:$VERSION
+
+# Push to Docker Hub
+docker push z0r3f/wallbot-docker:latest
+docker push z0r3f/wallbot-docker:$VERSION
 ```
 
-## Tag version
+**Windows (PowerShell):**
+```powershell
+# Build image
+docker build --tag z0r3f/wallbot-docker:latest .
 
-###### Windows
+# Tag with version
+$VERSION = Get-Content "VERSION"
+docker tag z0r3f/wallbot-docker:latest z0r3f/wallbot-docker:$VERSION
 
-```ps
-$version = Get-Content "VERSION"
+# Push to Docker Hub
+docker push z0r3f/wallbot-docker:latest
+docker push z0r3f/wallbot-docker:$VERSION
 ```
 
-###### Unix/MacOS
+---
+
+## Development with Docker Compose
+
+For development with live code reloading:
 
 ```bash
-version=`cat VERSION`
+docker-compose -f docker-compose.dev.yml up
 ```
 
-###### Tag
+This mounts the `src/` directory into the container and enables development mode.
+
+---
+
+## Running without Docker Compose
+
+If you prefer using `docker run` directly:
 
 ```bash
-docker tag z0r3f/wallbot-docker:latest z0r3f/wallbot-docker:$version
+docker run -d \
+  --name wallbot \
+  --restart unless-stopped \
+  -e BOT_TOKEN=your_token_here \
+  -e SEARCH_INTERVAL=300 \
+  -v wallbot-data:/data \
+  -v wallbot-logs:/logs \
+  z0r3f/wallbot-docker:latest
 ```
 
-###### Push
-
+**View logs:**
 ```bash
-docker push z0r3f/wallbot-docker:latest 
-docker push z0r3f/wallbot-docker:$version
+docker logs -f wallbot
 ```
 
-## See images
+**Stop container:**
+```bash
+docker stop wallbot
+docker rm wallbot
+```
 
+---
+
+## Other Docker Commands
+
+**See images:**
 ```bash
 docker images
 ```
 
-## Run on container
-
-```bash
-docker run --name wallbot --env BOT_TOKEN=<YOUR-TOKEN> z0r3f/wallbot-docker:latest
-```
-
-## Export image
-
+**Export image:**
 ```bash
 docker save -o wallbot-docker.tar z0r3f/wallbot-docker:latest
+```
+
+**Import image:**
+```bash
+docker load -i wallbot-docker.tar
 ```
 
 ## Target Project Structure

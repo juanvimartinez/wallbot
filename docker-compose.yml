@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  wallbot:
+    image: z0r3f/wallbot-docker:latest
+    container_name: wallbot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - SEARCH_INTERVAL=${SEARCH_INTERVAL:-300}
+    volumes:
+      - ./data:/data            # Bind mount: database stored in ./data directory
+      - ./logs:/logs            # Bind mount: logs stored in ./logs directory
+    networks:
+      - wallbot-network
+
+networks:
+  wallbot-network:
+    driver: bridge

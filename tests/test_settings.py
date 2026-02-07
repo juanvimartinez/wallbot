@@ -11,55 +11,55 @@ class TestSearchIntervalValidation:
     """Test suite for SEARCH_INTERVAL minimum value validation"""
     
     def test_search_interval_below_minimum(self):
-        """Test that SEARCH_INTERVAL below 180 seconds is clamped to 180"""
+        """Test that SEARCH_INTERVAL below 120 seconds is clamped to 120"""
         with patch.dict('os.environ', {'SEARCH_INTERVAL': '100'}):
             # Re-import to get fresh settings with mocked env var
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
-            assert settings.SEARCH_INTERVAL == 180, \
-                f"Expected 180, got {settings.SEARCH_INTERVAL}. Values below 180 should be clamped to 180."
+            assert settings.SEARCH_INTERVAL == 120, \
+                f"Expected 120, got {settings.SEARCH_INTERVAL}. Values below 120 should be clamped to 120."
     
     def test_search_interval_at_minimum(self):
-        """Test that SEARCH_INTERVAL at exactly 180 seconds is accepted"""
-        with patch.dict('os.environ', {'SEARCH_INTERVAL': '180'}):
+        """Test that SEARCH_INTERVAL at exactly 120 seconds is accepted"""
+        with patch.dict('os.environ', {'SEARCH_INTERVAL': '120'}):
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
-            assert settings.SEARCH_INTERVAL == 180, \
-                f"Expected 180, got {settings.SEARCH_INTERVAL}"
+            assert settings.SEARCH_INTERVAL == 120, \
+                f"Expected 120, got {settings.SEARCH_INTERVAL}"
     
     def test_search_interval_above_minimum(self):
-        """Test that SEARCH_INTERVAL above 180 seconds is preserved"""
+        """Test that SEARCH_INTERVAL above 120 seconds is preserved"""
         with patch.dict('os.environ', {'SEARCH_INTERVAL': '300'}):
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
             assert settings.SEARCH_INTERVAL == 300, \
-                f"Expected 300, got {settings.SEARCH_INTERVAL}. Values above 180 should be preserved."
+                f"Expected 300, got {settings.SEARCH_INTERVAL}. Values above 120 should be preserved."
     
     def test_search_interval_very_low_value(self):
-        """Test that very low SEARCH_INTERVAL values are clamped to 180"""
+        """Test that very low SEARCH_INTERVAL values are clamped to 120"""
         with patch.dict('os.environ', {'SEARCH_INTERVAL': '1'}):
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
-            assert settings.SEARCH_INTERVAL == 180, \
-                f"Expected 180, got {settings.SEARCH_INTERVAL}. Even very low values should be clamped to 180."
+            assert settings.SEARCH_INTERVAL == 120, \
+                f"Expected 120, got {settings.SEARCH_INTERVAL}. Even very low values should be clamped to 120."
     
     def test_search_interval_zero(self):
-        """Test that SEARCH_INTERVAL of 0 is clamped to 180"""
+        """Test that SEARCH_INTERVAL of 0 is clamped to 120"""
         with patch.dict('os.environ', {'SEARCH_INTERVAL': '0'}):
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
-            assert settings.SEARCH_INTERVAL == 180, \
-                f"Expected 180, got {settings.SEARCH_INTERVAL}. Zero should be clamped to 180."
+            assert settings.SEARCH_INTERVAL == 120, \
+                f"Expected 120, got {settings.SEARCH_INTERVAL}. Zero should be clamped to 120."
     
     def test_search_interval_default_value(self):
         """Test that default SEARCH_INTERVAL (300) is used when env var is not set"""
@@ -83,24 +83,24 @@ class TestSearchIntervalValidation:
                 f"Expected 3600, got {settings.SEARCH_INTERVAL}. High values should be preserved."
     
     def test_search_interval_just_below_minimum(self):
-        """Test that SEARCH_INTERVAL just below 180 (179) is clamped to 180"""
-        with patch.dict('os.environ', {'SEARCH_INTERVAL': '179'}):
+        """Test that SEARCH_INTERVAL just below 120 (119) is clamped to 120"""
+        with patch.dict('os.environ', {'SEARCH_INTERVAL': '119'}):
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
-            assert settings.SEARCH_INTERVAL == 180, \
-                f"Expected 180, got {settings.SEARCH_INTERVAL}. 179 should be clamped to 180."
+            assert settings.SEARCH_INTERVAL == 120, \
+                f"Expected 120, got {settings.SEARCH_INTERVAL}. 119 should be clamped to 120."
     
     def test_search_interval_just_above_minimum(self):
-        """Test that SEARCH_INTERVAL just above 180 (181) is preserved"""
-        with patch.dict('os.environ', {'SEARCH_INTERVAL': '181'}):
+        """Test that SEARCH_INTERVAL just above 120 (121) is preserved"""
+        with patch.dict('os.environ', {'SEARCH_INTERVAL': '121'}):
             import importlib
             from src.wallbot.config import settings
             importlib.reload(settings)
             
-            assert settings.SEARCH_INTERVAL == 181, \
-                f"Expected 181, got {settings.SEARCH_INTERVAL}. 181 should be preserved."
+            assert settings.SEARCH_INTERVAL == 121, \
+                f"Expected 121, got {settings.SEARCH_INTERVAL}. 121 should be preserved."
 
 
 class TestOtherSettings:

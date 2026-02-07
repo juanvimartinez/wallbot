@@ -3,9 +3,9 @@ import os
 TOKEN = os.getenv("BOT_TOKEN", "Bot Token does not exist")
 PROFILE = os.getenv("PROFILE")
 
-# Ensure SEARCH_INTERVAL is not less than 180 seconds
+# Ensure SEARCH_INTERVAL is not less than 120 seconds
 _search_interval = int(os.getenv("SEARCH_INTERVAL", "300"))
-SEARCH_INTERVAL = max(_search_interval, 180)
+SEARCH_INTERVAL = max(_search_interval, 120)
 
 # Cleanup settings (internal configuration)
 CLEANUP_INTERVAL = 86400  # Run cleanup every 24 hours (in seconds)

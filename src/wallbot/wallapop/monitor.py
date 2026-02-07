@@ -6,13 +6,14 @@ from re import sub
 from typing import List
 
 from src.wallbot.config.settings import SEARCH_INTERVAL, CLEANUP_INTERVAL, CLEANUP_RETENTION_HOURS
+from src.wallbot.database.db_helper import DBHelper
 from src.wallbot.database.models import ChatSearch
 from src.wallbot.telegram.notifications import send_notification
 from src.wallbot.wallapop.api_client import WallapopClient
 
 
 class WallapopMonitor:
-    def __init__(self, db):
+    def __init__(self, db: DBHelper):
         self.db = db
         self.client = WallapopClient()
         self.is_running = False
@@ -82,6 +83,7 @@ class WallapopMonitor:
         item_user = item['user_id']
         item_web_slug = item['web_slug']
         item_reserved = item['reserved']['flag']
+        item_publish_date = item['created_at']
 
         logging.info(
             'Found: id=%s, price=%s, title=%s, user=%s, reserved=%s',
@@ -96,14 +98,14 @@ class WallapopMonitor:
 
         if existing_item is None:
             self._process_new_item(
-                item_id, chat_id, item_title, item_price, item_web_slug, item_user, item_reserved)
+                item_id, chat_id, item_title, item_price, item_web_slug, item_user, item_reserved, item_publish_date)
         else:
             self._process_existing_item(
                 existing_item, item_id, item_price, item_title, item_web_slug, chat_id, item_reserved)
 
-    def _process_new_item(self, item_id, chat_id, title, price, web_slug, user_id, reserved):
+    def _process_new_item(self, item_id, chat_id, title, price, web_slug, user_id, reserved, publish_date):
         self.db.add_item(item_id, chat_id, title, price,
-                         web_slug, user_id, reserved=reserved)
+                         web_slug, user_id, publish_date=publish_date, reserved=reserved)
 
         if reserved:
             send_notification(chat_id, price, title, web_slug,

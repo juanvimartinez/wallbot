@@ -3,9 +3,10 @@
 FROM python:3.8-slim-bookworm
 
 RUN apt-get update && \
-    apt-get install -y locales && \
+    apt-get install -y locales sqlite3 && \
     sed -i -e 's/# es_ES.UTF-8 UTF-8/es_ES.UTF-8 UTF-8/' /etc/locale.gen && \
-    dpkg-reconfigure --frontend=noninteractive locales
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV LANG es_ES.UTF-8
 ENV LC_ALL es_ES.UTF-8

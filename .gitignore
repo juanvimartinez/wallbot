@@ -7,3 +7,14 @@ db.sqlite
 log
 wallbot.log.*
 .DS_Store
+
+# Docker volumes (bind mounts)
+data/
+logs/
+
+# Environment variables
+.env
+
+# Coverage reports
+.coverage
+htmlcov/
