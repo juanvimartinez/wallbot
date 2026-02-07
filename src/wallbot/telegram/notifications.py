@@ -24,7 +24,7 @@ def send_notification(chat_id, price, title, url_item, notes=None, notification_
     elif notes is not None:
         text += ICON_COLLISION + ' '
 
-    text += locale.currency(price, grouping=True)
+    text += locale.currency(float(price), grouping=True)
 
     if notes is not None:
         text += notes + ' ' + ICON_COLLISION

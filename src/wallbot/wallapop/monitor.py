@@ -78,7 +78,7 @@ class WallapopMonitor:
 
     def _process_item(self, item, chat_id):
         item_id = item['id']
-        item_price = item['price']['amount']
+        item_price = float(item['price']['amount'])
         item_title = item['title']
         item_user = item['user_id']
         item_web_slug = item['web_slug']
@@ -132,7 +132,7 @@ class WallapopMonitor:
 
         if price_changed:
             # Construir historial de precios
-            price_history = locale.currency(existing_item.price, grouping=True)
+            price_history = locale.currency(float(existing_item.price), grouping=True)
             if existing_item.observaciones:
                 price_history += ' < ' + existing_item.observaciones
 
@@ -147,7 +147,7 @@ class WallapopMonitor:
             logging.info(
                 'Price drop: id=%s, price=%s, title=%s',
                 str(item_id),
-                locale.currency(new_price, grouping=True),
+                locale.currency(float(new_price), grouping=True),
                 title
             )
         elif reservation_changed:
