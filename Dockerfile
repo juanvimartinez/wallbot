@@ -8,9 +8,9 @@ RUN apt-get update && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     rm -rf /var/lib/apt/lists/*
 
-ENV LANG es_ES.UTF-8
-ENV LC_ALL es_ES.UTF-8
-ENV TZ Europe/Madrid
+ENV LANG=es_ES.UTF-8
+ENV LC_ALL=es_ES.UTF-8
+ENV TZ=Europe/Madrid
 
 WORKDIR /app
 

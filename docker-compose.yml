@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   wallbot:
     image: z0r3f/wallbot-docker:latest
