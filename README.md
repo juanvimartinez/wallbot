@@ -117,17 +117,30 @@ The `PROFILE` environment variable controls the application mode:
    SEARCH_INTERVAL=300
    ```
 
-4. **Start the bot**
+4. **Build the Docker image**
+   ```bash
+   # Linux/macOS
+   chmod +x build.sh
+   ./build.sh
+
+   # Windows (PowerShell)
+   .\build.ps1
+
+   # Windows (CMD)
+   build.bat
+   ```
+
+5. **Start the bot**
    ```bash
    docker-compose up -d
    ```
 
-5. **View logs**
+6. **View logs**
    ```bash
    docker-compose logs -f wallbot
    ```
 
-6. **Stop the bot**
+7. **Stop the bot**
    ```bash
    docker-compose down
    ```
