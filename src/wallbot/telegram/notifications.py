@@ -10,6 +10,8 @@ def send_notification(chat_id, price, title, url_item, notes=None, notification_
     # https://apps.timwhitlock.info/emoji/tables/unicode
     if notification_type == 'reserved':
         text = ICON_LOCK + ' *RESERVADO: ' + title + '*'
+    elif notification_type == 'price_reserved':
+        text = ICON_LOCK + ' *RESERVADO + NUEVO PRECIO: ' + title + '*'
     elif notes is not None:
         text = ICON_EXCLAMATION + ' *' + title + '*'
     else:
@@ -19,6 +21,9 @@ def send_notification(chat_id, price, title, url_item, notes=None, notification_
 
     if notification_type == 'reserved':
         text += ICON_RESERVED + ' Este artículo ha sido reservado\n'
+    elif notification_type == 'price_reserved':
+        text += ICON_RESERVED + ' Este artículo ha sido reservado\n'
+        text += ICON_EXCLAMATION + ' Nuevo precio: '
     elif notification_type == 'price':
         text += ICON_EXCLAMATION + ' Nuevo precio: '
     elif notes is not None:

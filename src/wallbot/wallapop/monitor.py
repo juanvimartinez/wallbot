@@ -130,7 +130,28 @@ class WallapopMonitor:
         price_changed = new_price_decimal < old_price_decimal
         reservation_changed = not existing_item.reserved and new_reserved
 
-        if price_changed:
+        if price_changed and reservation_changed:
+            # Both price dropped and item was reserved (e.g., offer accepted)
+            # Construir historial de precios
+            price_history = locale.currency(float(existing_item.price), grouping=True)
+            if existing_item.observaciones:
+                price_history += ' < ' + existing_item.observaciones
+
+            # Actualizar item en base de datos
+            self.db.update_item(item_id, str(new_price),
+                                price_history, new_reserved)
+
+            # Notificar cambio de precio y reserva combinados
+            send_notification(chat_id, new_price, title, web_slug,
+                              ' < ' + price_history, notification_type='price_reserved')
+
+            logging.info(
+                'Price drop + Reserved: id=%s, price=%s, title=%s',
+                str(item_id),
+                locale.currency(float(new_price), grouping=True),
+                title
+            )
+        elif price_changed:
             # Construir historial de precios
             price_history = locale.currency(float(existing_item.price), grouping=True)
             if existing_item.observaciones:
